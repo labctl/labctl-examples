@@ -1,0 +1,51 @@
+{{ if eq .clab_node "sr1" }}
+/configure bfd bfd-template "sbfd1"
+
+
+   /configure {
+       router "Base" {
+           mpls {
+               path "to_sr3_1" {
+                   admin-state enable
+                   hop 1 {
+                       ip-address 10.0.50.30
+                       type strict
+                   }
+               }
+               path "to_sr3_2" {
+                   admin-state enable
+                   hop 1 {
+                       ip-address 10.0.50.20
+                       type strict
+                   }
+                   hop 2 {
+                       ip-address 10.0.50.30
+                       type strict
+                   }
+               }
+               lsp "to_sr3" {
+                   delete bfd
+                   admin-state enable
+                   type p2p-sr-te
+                   to 10.0.50.30
+                   primary "to_sr3_1" {
+                       admin-state enable
+                       bfd {
+                           bfd-liveness true
+                           bfd-template sbfd1
+                       }
+                   }
+                   secondary "to_sr3_2" {
+                       admin-state enable
+                       standby true
+                       bfd {
+                           bfd-liveness true
+                           bfd-template sbfd1
+                       }
+                 }
+               }
+           }
+       }
+   }
+
+{{ end }}

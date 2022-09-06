@@ -1,0 +1,19 @@
+delete /configure router
+delete /configure policy-options
+delete /configure service
+# need to remove all references first
+#delete /configure groups
+
+{{ range .clab_links }}
+
+delete /configure port {{ .port }}
+
+{{- if contains  "/c" .port }}
+delete /configure port {{ slice 0 -2 .port }}
+{{- end }}
+
+{{ end }}
+
+# first delete the sr-labels (dynamic) before changing the static-label-range...
+# so here we undo what we deleted above
+/configure router mpls-labels static-label-range 11968

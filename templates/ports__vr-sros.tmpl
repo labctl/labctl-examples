@@ -1,0 +1,50 @@
+##
+## Configure Ports & LLDP
+##
+
+{{ range .clab_links }}
+    {{ expect .port "^\\d+/\\d/" }}
+{{ end }}
+
+{{ range .clab_links }}
+
+{{- if contains  "/c" .port }}
+/configure port {{ slice 0 -2 .port }} admin-state enable
+/configure port {{ .port | slice 0 -2 }} connector breakout c1-10g
+{{- end }}
+
+/configure port {{ .port }} admin-state enable
+
+{{ end }}
+
+/configure system login-control idle-timeout 1440
+
+/configure apply-groups ["baseport"]
+/configure groups {
+    group "baseport" {
+            port "<.*\/[0-9]+>" {
+            # wanted to add this, but you really need the /1 context to exist
+            # admin-state enable
+            ethernet {
+                mode hybrid
+                encap-type dot1q
+                lldp {
+                    dest-mac nearest-bridge {
+                        notification true
+                        receive true
+                        transmit true
+                        tx-tlvs {
+                            #port-desc true
+                            sys-name true
+                            #sys-desc true
+                            sys-cap true
+                        }
+                        tx-mgmt-address system {
+                            admin-state enable
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

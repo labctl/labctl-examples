@@ -1,0 +1,26 @@
+##
+## Static discriminators based on the clab_system_ip 5200x where x is the last octet
+##
+
+# Head-end
+{{- expect .clab_system_ip "ip" }}
+{{- $this := .clab_system_ip }}
+
+{{- range .clab_nodes }}
+  {{- expect .clab_system_ip "ip" }}
+  {{- if ne $this .clab_system_ip }}
+
+    /configure router bfd seamless-bfd peer {{ ip .clab_system_ip }}
+    discriminator 525{{ ip .clab_system_ip | split "." | index -1 | printf "%03v" }}
+
+  {{- end }}
+{{- end }}
+
+
+# Endpoit / Reflector
+
+/configure bfd seamless-bfd
+    reflector anycast
+    discriminator 525{{ ip .clab_system_ip | split "." | index -1 | printf "%03v" }}
+    local-state up
+    admin-state enable

@@ -1,0 +1,100 @@
+##
+## Configure ISIS
+## Requires the ports to be configured
+##
+
+{{ expect .clab_system_ip "ip" }}
+{{ optional .ipv4_sid_index "0-999" }}
+{{ optional .ipv4_sid_label "0-99999" }}
+{{ range .clab_links }}
+    {{ expect .port "^\\d+/\\d/" }}
+    {{ expect .clab_link_name "string" }}
+    {{ expect .clab_link_ip "ip" }}
+    {{ optional .vlan "0-4096" }}
+    {{ optional .isis_iid "0-31" }}
+    {{ optional .metric "1-10000" }}
+{{ end }}
+
+# Ensure we have a slice for instance id - $iid
+{{ $iid := .isis_iid}}
+{{ if not (test.IsKind "slice" $iid) }}
+{{ $iid = coll.Slice $iid }}
+{{ end }}
+# Ensure they all have the correct integers
+{{ range $iid }}{{ expect . "0-31" }}{{ end }}
+
+/configure router interface "system"
+    ipv4 primary address {{ ip .clab_system_ip }}
+    ipv4 primary prefix-length {{ ipmask .clab_system_ip }}
+    admin-state enable
+
+/configure router
+    autonomous-system {{ default 64500 .as_number }}
+    mpls-labels static-label-range 11968
+    mpls-labels sr-labels start 12000 end 19999
+
+
+# From 21.10 SROS supports a shared SID across instances
+/configure router segment-routing sr-mpls prefix-sids "system" {
+    {{ if .ipv4_sid_index }}ipv4-sid index {{ .ipv4_sid_index }}{{ end }}
+    {{ if .ipv4_sid_label }}ipv4-sid label {{ .ipv4_sid_label }}{{ end }}
+}
+
+{{ range $iid }}
+/configure router isis {{ . }}
+    area-address 49.0000.0000.0000.{{ . | printf "%02v" }}
+    #database-export igp-identifier {{ . }} bgp-ls-identifier value {{ . }}
+    level-capability 2
+    level 2 wide-metrics-only
+    traffic-engineering
+    advertise-router-capability as
+    prefix-attributes-tlv true
+    admin-state enable
+    interface "system" {
+        admin-state enable
+        passive true
+        level-capability 2
+    }
+    segment-routing {
+        admin-state enable
+        prefix-sid-range global
+    }
+{{ end }}
+
+/configure router rsvp
+    admin-state enable
+    interface system admin-state enable
+
+/configure router mpls
+    cspf-on-loose-hop
+    interface system admin-state enable
+    admin-state enable
+    pce-report rsvp-te true
+    pce-report sr-te true
+
+{{ range .clab_links }}
+
+/configure router interface {{ .clab_link_name }}
+    ipv4 primary address {{ ip .clab_link_ip }}
+    ipv4 primary prefix-length {{ ipmask .clab_link_ip }}
+    port {{ .port }}:{{ default 10 .vlan }}
+
+{{- if .isis_iid }}
+/configure router isis {{ .isis_iid }}
+    interface {{ .clab_link_name }} {
+        admin-state enable
+        interface-type point-to-point
+        level 2 metric {{ default 100 .metric }}
+    }
+{{- end }}
+
+/configure router rsvp
+    interface {{ .clab_link_name }} admin-state enable
+
+/configure router mpls
+    interface {{ .clab_link_name }} {
+        admin-state enable
+        te-metric 10
+    }
+
+{{ end }}

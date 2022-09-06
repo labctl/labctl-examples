@@ -1,0 +1,26 @@
+##
+## Configure some static adj sid values
+##
+
+/configure router "Base" {
+    mpls-labels {
+        reserved-label-block "Adj-SID" {
+            start-label 24000
+            end-label 24999
+        }
+    }
+}
+
+{{ $nodes := .clab_nodes }}
+
+{{ range $i, $v := .clab_links }}
+    {{- if $v.isis_iid }}
+    {{- $to   := (index $nodes $v.clab_far.clab_node).clab_system_ip | ip | split "." | slice -1 0 | join ""  -}}
+    /configure router isis {{ $v.isis_iid }} {
+        segment-routing srlb "Adj-SID"
+        interface {{ $v.clab_link_name }} {
+            interface-type point-to-point
+            ipv4-adjacency-sid label 24{{ $to | printf "%03v" }}
+        }
+    {{- end }}
+{{ end }}

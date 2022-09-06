@@ -1,0 +1,19 @@
+{{ if eq .clab_node "sr1" }}
+
+# change to per LSP mode
+ /configure {
+     router "Base" {
+         mpls {
+             lsp "to_sr3" {
+                 bfd {
+                     bfd-liveness true
+                     bfd-template "sbfd1"
+                 }
+                delete primary "to_sr3_1" bfd
+                delete secondary "to_sr3_2" bfd
+             }
+         }
+     }
+ }
+
+{{ end }}

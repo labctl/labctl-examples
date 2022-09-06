@@ -1,0 +1,33 @@
+name: srl3
+
+topology:
+  defaults:
+    kind: srl
+    image: ghcr.io/nokia/srlinux:latest
+  nodes:
+    srl1:
+      config:
+        vars:
+          clab_system_ip: 10.0.0.1/32
+    srl2:
+      config:
+        vars:
+          clab_system_ip: 10.0.0.2/32
+    srl3:
+      config:
+        vars:
+          clab_system_ip: 10.0.0.3/32
+
+  links:
+    - endpoints: ["srl1:e1-1", "srl2:e1-2"]
+      vars:
+        port: [ethernet-1/1, ethernet-1/2]
+        isis_iid: 1
+    - endpoints: ["srl2:e1-1", "srl3:e1-2"]
+      vars:
+        port: [ethernet-1/1, ethernet-1/2]
+        isis_iid: 1
+    - endpoints: ["srl3:e1-1", "srl1:e1-2"]
+      vars:
+        port: [ethernet-1/1, ethernet-1/2]
+        isis_iid: 1

@@ -1,0 +1,39 @@
+name: sros-seamless-bfd
+
+topology:
+  defaults:
+    kind: vr-sros
+    image: registry.srlinux.dev/pub/vr-sros:22.7.R1
+    license: ~/license/sros.txt
+    config:
+      vars:
+        isis_iid: 1
+  nodes:
+    sr1:
+      config:
+        vars:
+          clab_system_ip: 10.0.0.10/32
+          ipv4_sid_index: 10
+    sr2:
+      config:
+        vars:
+          clab_system_ip: 10.0.0.20/32
+          ipv4_sid_index: 20
+    sr3:
+      config:
+        vars:
+          clab_system_ip: 10.0.0.30/32
+          ipv4_sid_index: 30
+  links:
+    - endpoints: [sr1:eth1, sr2:eth2]
+      vars:
+        port: [1/1/c1/1, 1/1/c2/1]
+        isis_iid: 1
+    - endpoints: [sr2:eth1, sr3:eth2]
+      vars:
+        port: [1/1/c1/1, 1/1/c2/1]
+        isis_iid: 1
+    - endpoints: [sr3:eth1, sr1:eth2]
+      vars:
+        port: [1/1/c1/1, 1/1/c2/1]
+        isis_iid: 1

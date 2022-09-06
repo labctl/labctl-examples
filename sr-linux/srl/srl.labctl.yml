@@ -1,0 +1,40 @@
+options:
+    commands:
+        - |-
+          Delete interfaces & default network instance (You can see the content of the **delete** script from the templates tab, the 4th tab in Config Engine)
+
+          [commit -l delete](config:)
+        - |
+          Create some SRL ports!! (The compare/diff is optional, but you have to **commit** to move to the next step)
+
+          - [compare -l ports](config:)
+          - [commit -l ports](config:)
+        - |
+          Enable ISIS as IGP in the default network instance
+
+          - [compare -l isis](config:)
+          - [commit -l isis](config:)
+        - |-
+          The route table reflects routes distributed by ISIS
+
+          [send -l show-route-table](config:)
+    height: 450
+    layout: grid
+layouts:
+    nodes:
+        srl1:
+            x: -135
+            "y": -60
+        srl2: {x: -210, "y": 90}
+        srl3: {x: 45, "y": 15}
+templates:
+    link: |
+        source_above: {{ .source_endpoint }}
+        source_below: ".{{ .source_vars.clab_link_ip | ip | split "." | index -1 }}"
+        target_above: {{ .target_endpoint }}
+        target_below: ".{{ .target_vars.clab_link_ip | ip | split "." | index -1 }}"
+        center_above:
+        center_below: {{ .source_vars.clab_link_ip | split "." | slice 0 3 | join "." }}/{{ .source_vars.clab_link_ip | split "/" | index -1  }}
+    node: |-
+        label: {{ .clab_role }}
+        label_below: {{ .clab_node }}

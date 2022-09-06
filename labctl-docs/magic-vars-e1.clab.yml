@@ -1,0 +1,24 @@
+name: e1
+
+topology:
+  kinds:
+    srl:
+      image: ghcr.io/nokia/srlinux
+    vr-sros:
+      image: registry.srlinux.dev/pub/vr-sros:22.7.R1
+      license: ~/license/sros.txt
+  defaults:
+    kind: vr-sros
+
+  nodes:
+    pe1:
+      config:
+        vars:
+          clab_system_ip: 10.0.0.1/32
+    pe2:
+      config:
+        vars:
+          clab_system_ip: 10.0.0.2/32
+
+  links:
+    - endpoints: ["pe1:eth1", "pe2:eth1"]

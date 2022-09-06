@@ -1,0 +1,16 @@
+##
+## Configure Ports & LLDP
+##
+{{ range .clab_links }}
+    {{ expect .port "^(ethernet-\\d+/|e\\d+-)\\d+$" }}
+{{ end }}
+
+/system lldp admin-state enable
+
+{{ range .clab_links }}
+/interface {{ .port }} {
+    admin-state enable
+    vlan-tagging true
+}
+
+{{ end }}
