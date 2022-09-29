@@ -3,7 +3,7 @@ name: srl3
 topology:
   defaults:
     kind: srl
-    image: ghcr.io/nokia/srlinux:latest
+    image: ghcr.io/nokia/srlinux
   nodes:
     srl1:
       config:

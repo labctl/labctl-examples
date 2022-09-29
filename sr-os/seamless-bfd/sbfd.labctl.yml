@@ -1,21 +1,25 @@
 options:
     commands:
         - 'Redo all configuration: [commit -l delete,ports,isis,sbfd-reflector](run:)  '
-        - "Create the SR-TE LSP [commit -l srte](run:)  \n\nPrimary: [sr1 sr3](path:) and Secondary standby: [sr1 sr2 sr3](path:)"
+        - "Create the SR-TE LSP [commit -l srte](run:)  \n\n[primary](path:2) and [secondary standby](path:0,1)\n"
         - '[send -l show -f sr1](run:)'
-        - '[compare -l srte-lsp-bfd](run:)'
-        - 'Ensure we use LSP BFD on the LSP: [commit -l srte-lsp-bfd](run:)'
-        - |
-          Sometimes you want to show a path [primary](path:2) [secondary](path:0,1) sometimes run a command
+        - |-
+          Check is we have LSP BFD [compare -l srte-lsp-bfd](run:)
+
+          Ensure we use LSP BFD on the LSP: [commit -l srte-lsp-bfd](run:)
+        - |-
+          Check is we have Path BFD [compare -l srte](run:)
+
+          Ensure we use Path BFD on the LSP: [commit -l srte](run:)
     height: 450
     layout: grid
 layouts:
     nodes:
         sr1:
-            x: -270
-            "y": -120
-        sr2: {x: -390, "y": -45}
-        sr3: {x: -150, "y": -30}
+            x: -300
+            "y": -135
+        sr2: {x: -435, "y": -30}
+        sr3: {x: -210, "y": -15}
 templates:
     link: |-
         source_above: {{ .source_endpoint }}

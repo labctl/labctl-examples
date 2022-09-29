@@ -14,19 +14,20 @@ options:
 
           - [compare -l isis](config:)
           - [commit -l isis](config:)
+        - "Alternatively you can also configure the entire lab in one go \n\n[commit -l delete,ports,isis](config:)"
         - |-
           The route table reflects routes distributed by ISIS
 
           [send -l show-route-table](config:)
     height: 450
-    layout: grid
+    layout: force
 layouts:
     nodes:
         srl1:
-            x: -135
-            "y": -60
-        srl2: {x: -210, "y": 90}
-        srl3: {x: 45, "y": 15}
+            x: -57.514877
+            "y": 11.465864
+        srl2: {x: 37.97606, "y": 44.019238}
+        srl3: {x: 19.246222, "y": -55.257282}
 templates:
     link: |
         source_above: {{ .source_endpoint }}
