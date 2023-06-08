@@ -1,0 +1,73 @@
+# Configure a vprn
+{{ $r20 := (default 0 .r20) }}
+{{ $policy := (default 1 .policy) }}
+
+{{ range $vprn, $ip := .vprn }}
+
+{{ expect $vprn "100-10000" }}
+{{ expect (printf "%v/32" $ip) "ip" }}
+
+/configure policy-options
+    community "vrf{{ $vprn }}" {
+        member "target:64500:{{ $vprn }}" { }
+    }
+    policy-statement "import-vrf{{ $vprn }}" {
+        entry 10 {
+            from {
+                community {
+                    name "vrf{{ $vprn }}"
+                }
+                #delete protocol
+                protocol {
+                    name [bgp-vpn]
+                }
+            }
+            action {
+                action-type accept
+                delete admin-tag-policy
+                #admin-tag-policy "no_blue"
+            }
+        }
+    }
+
+/configure service
+    vprn "{{ $vprn }}" {
+        admin-state enable
+        customer "1"
+        interface "lo0" {
+            admin-state enable
+            loopback true
+            ipv4 {
+                primary {
+                    address {{ ip $ip }}
+                    prefix-length 32
+                }
+            }
+        }
+        {{- if not $r20 }}
+        bgp-ipvpn mpls {
+                admin-state enable
+        {{- end }}
+                route-distinguisher "64500:{{ $vprn }}"
+                {{- $p := eq $policy 1 }}
+                {{- if $p }}
+                delete vrf-target
+                vrf-target export-community "target:64500:{{ $vprn }}"
+                vrf-import {
+                    policy ["import-vrf{{ $vprn }}"]
+                }
+                {{- else }}
+                delete vrf-import
+                vrf-target {
+                    community "target:64500:{{ $vprn }}"
+                }
+                {{- end }}
+                auto-bind-tunnel {
+                    resolution filter
+                    enforce-strict-tunnel-tagging false
+                    resolution-filter {
+                        sr-te true
+                        sr-isis true
+                    }
+                }
+{{- end }}

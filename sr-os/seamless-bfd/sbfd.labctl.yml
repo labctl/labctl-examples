@@ -1,25 +1,15 @@
 options:
-    commands:
-        - 'Redo all configuration: [commit -l delete,ports,isis,sbfd-reflector](run:)  '
-        - "Create the SR-TE LSP [commit -l srte](run:)  \n\n[primary](path:2) and [secondary standby](path:0,1)\n"
-        - '[send -l show -f sr1](run:)'
-        - |-
-          Check is we have LSP BFD [compare -l srte-lsp-bfd](run:)
+    commands: []
 
-          Ensure we use LSP BFD on the LSP: [commit -l srte-lsp-bfd](run:)
-        - |-
-          Check is we have Path BFD [compare -l srte](run:)
-
-          Ensure we use Path BFD on the LSP: [commit -l srte](run:)
     height: 450
     layout: grid
 layouts:
     nodes:
         sr1:
-            x: -300
-            "y": -135
-        sr2: {x: -435, "y": -30}
-        sr3: {x: -210, "y": -15}
+            x: 4.960054
+            "y": -58.242813
+        sr2: { x: -60, "y": 15 }
+        sr3: { x: 47.952644, "y": 33.48476 }
 templates:
     link: |-
         source_above: {{ .source_endpoint }}

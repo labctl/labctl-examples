@@ -1,0 +1,79 @@
+# ibgp - 0 = no RR config
+# ibgp_rr - a RR IP
+# ibgp_family - list of families - optional
+
+{{ $ibgp := bool (default "1" .ibgp) }}
+{{ $family := split "," (default "ipv4,ipv6,vpn-ipv4,vpn-ipv6" .ibgp_family) }}
+
+{{ if and .ibgp_rr $ibgp }}
+# Ensure this is an IP
+{{ expect (printf "%v/32" .ibgp_rr) "ip" }}
+
+{{ $is_rr := eq .clab_system_ip (printf "%v/32" .ibgp_rr) }}
+
+{{ if $is_rr }}
+#
+# RR - dynamic BGP neighbors
+#
+
+/configure router bgp {
+    admin-state enable
+    path-mtu-discovery false
+    split-horizon true
+    advertise-inactive true
+    dynamic-neighbor-limit 1000
+    cluster {
+        cluster-id {{ .ibgp_rr }}
+    }
+    ebgp-default-reject-policy {
+        import false
+        export false
+    }
+    group RR {
+        type internal
+        min-route-advertisement 5
+        dynamic-neighbor {
+            match {
+                prefix 0.0.0.0/0 {
+                }
+            }
+        }
+        family {
+            {{ range $family }}{{ . }} true
+    {{ end }}
+        }
+    }
+    delete group IBGP
+    delete neighbor {{ .ibgp_rr }}
+
+
+{{ else }}
+
+#
+# BGP from all PEs
+#
+/configure router bgp {
+    admin-state enable
+    path-mtu-discovery false
+    split-horizon true
+    delete group "IBGP"
+    group "IBGP" {
+        type internal
+        min-route-advertisement 5
+        family {
+        {{ range $family }}{{ . }} true
+{{ end }}
+        }
+    }
+    neighbor {{ .ibgp_rr }} {
+        admin-state enable
+        group "IBGP"
+    }
+}
+
+{{ end }}
+{{ else }}
+# No ibgp for this router!
+# ibgp = '{{ $ibgp }}'
+# ibgp_rr = '{{ .ibgp_rr }}'
+{{ end }}

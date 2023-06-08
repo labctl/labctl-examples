@@ -1,0 +1,44 @@
+{{- if index . "ebgp_peeras" -}}
+
+{{- $peeras := default "65530" .ebgp_peeras -}}
+{{- $family := split "," (default "ipv4,ipv6,vpn-ipv4,vpn-ipv6" .ebgp_family) -}}
+
+/configure router bgp {
+    admin-state enable
+    ebgp-default-reject-policy {
+        import false
+        export false
+    }
+{{ if index . "ebgp_cli" }}
+    {{ range .ebgp_cli }}{{ . }}
+{{ end }}
+{{end}}
+    group "ebgp" {
+        type external
+        peer-as {{ $peeras }}
+        split-horizon true
+
+        delete family
+        family {
+            {{ range $family }}{{ . }} true
+{{ end }}
+        }
+    }
+    neighbor "{{ .ebgp_peerip }}" {
+        group "ebgp"
+    }
+
+    next-hop-resolution {
+        labeled-routes {
+            transport-tunnel {
+                family vpn {
+                    resolution filter
+                    resolution-filter {
+                        sr-isis true
+                    }
+                }
+            }
+        }
+    }
+
+{{ end }}

@@ -1,0 +1,106 @@
+
+# Common config from
+# https://github.com/hellt/vrnetlab/blob/master/sros/docker/launch.py#L210
+
+/configure system name {name}
+/configure system netconf no shutdown
+/configure system security profile \"administrative\" netconf base-op-authorization lock
+/configure system login-control ssh inbound-max-sessions 30
+/configure system management-interface yang-modules no nokia-modules
+/configure system management-interface yang-modules nokia-combined-modules
+/configure system management-interface yang-modules no base-r13-modules
+/configure system grpc allow-unsecure-connection
+/configure system grpc gnmi auto-config-save
+/configure system grpc gnmi no shutdown
+/configure system grpc rib-api no shutdown
+/configure system grpc no shutdown
+/configure system netconf auto-config-save
+/configure system netconf no shutdown
+/configure system security profile "administrative" netconf base-op-authorization kill-session
+/configure system security profile "administrative" netconf base-op-authorization lock
+/configure system snmp packet-size 9216
+/configure system snmp streaming no shutdown
+/configure system snmp no shutdown
+/configure system security user "admin" access netconf
+/configure system security user "admin" access console
+/configure system security user "admin" access grpc
+/configure system security user "admin" access snmp
+/configure system security user "admin" access ftp
+
+# Additional
+/configure system login-control ssh login-control idle-timeout 1440
+
+{{ if eq .clab_type "ixr-e-big" }}
+/configure card 1 card-type imm24-sfp++8-sfp28+2-qsfp28
+/configure card 1 mda 1 mda-type m24-sfp++8-sfp28+2-qsfp28
+{{ end }}
+
+{{ if eq .clab_type "ixr-r6" }}
+/configure card 1 mda 1 mda-type m6-10g-sfp++4-25g-sfp28
+{{ end }}
+
+{{ if eq .clab_type "ixr-s" }}
+/configure card 1 card-type imm48-sfp++6-qsfp28
+/configure card 1 mda 1 mda-type m48-sfp++6-qsfp28
+{{ end }}
+
+{{ if eq .clab_type "ixr-e-small" }}
+# ??? ixr-e-big
+/configure card 1 card-type imm24-sfp++8-sfp28+2-qsfp28
+/configure card 1 mda 1 mda-type m24-sfp++8-sfp28+2-qsfp28
+{{ end }}
+
+{{ if eq .clab_type "sr-1s" }}
+/configure system power-shelf 1 power-shelf-type ps-a4-shelf-dc
+/configure system power-shelf 1 power-module 1 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 2 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 3 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 4 power-module-type ps-a-dc-6000
+/configure card 1 card-type xcm-1s
+/configure card 1 mda 1 mda-type s36-100gb-qsfp28
+{{ end }}
+
+{{ if eq .clab_type "sr-14s" }}
+/configure system power-shelf 1 power-shelf-type ps-a10-shelf-dc
+/configure system power-shelf 1 power-module 1 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 2 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 3 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 4 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 5 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 6 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 7 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 8 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 9 power-module-type ps-a-dc-6000
+/configure system power-shelf 1 power-module 10 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-shelf-type ps-a10-shelf-dc
+/configure system power-shelf 2 power-module 1 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 2 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 3 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 4 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 5 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 6 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 7 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 8 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 9 power-module-type ps-a-dc-6000
+/configure system power-shelf 2 power-module 10 power-module-type ps-a-dc-6000
+/configure sfm 1 sfm-type sfm-s
+/configure sfm 2 sfm-type sfm-s
+/configure sfm 3 sfm-type sfm-s
+/configure sfm 4 sfm-type sfm-s
+/configure sfm 5 sfm-type sfm-s
+/configure sfm 6 sfm-type sfm-s
+/configure sfm 7 sfm-type sfm-s
+/configure sfm 8 sfm-type sfm-s
+/configure card 1 card-type xcm-14s
+/configure card 1 mda 1 mda-type s36-100gb-qsfp28
+{{ end }}
+
+{{ if eq .clab_type "sr-1" }}
+/configure card 1 card-type iom-1
+/configure card 1 mda 1 mda-type me12-100gb-qsfp28
+{{ end }}
+
+{{ if eq .clab_type "sr-1e" }}
+/configure card 1 card-type iom-e
+/configure card 1 mda 1 mda-type me40-1gb-csfp
+{{ end }}

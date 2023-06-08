@@ -37,3 +37,19 @@ INFO[0005] Adding containerlab host entries to /etc/hosts file
 | 3 | clab-sros-seamless-bfd-sr3 | 2613b9de2109 | registry.srlinux.dev/pub/vr-sros:22.7.R1 | vr-sros | running | 172.20.20.14/24 | 2001:172:20:20::e/64 |
 +---+----------------------------+--------------+------------------------------------------+---------+---------+-----------------+----------------------+
 ```
+
+## Lab commands
+
+Redo all configuration: [commit -l delete,ports,isis,sbfd-reflector](run:)
+
+Create the SR-TE LSP [commit -l srte](run:)  \n\n[primary](path:2) and [secondary standby](path:0,1)
+
+[send -l show -f sr1](run:)
+
+Check if we have LSP BFD [compare -l srte-lsp-bfd](run:)
+
+Ensure we use LSP BFD on the LSP: [commit -l srte-lsp-bfd](run:)
+
+Check if we have Path BFD [compare -l srte](run:)
+
+Ensure we use Path BFD on the LSP: [commit -l srte](run:)
